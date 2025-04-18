@@ -1,5 +1,6 @@
 <?php
 require_once($_SERVER['DOCUMENT_ROOT'] . '/compuyatienda/config/db.php');
+require_once($_SERVER['DOCUMENT_ROOT'] . '/compuyatienda/functions/product-functions.php');
 
 /**
  * Obtiene las estadísticas para mostrar en la página de inicio
@@ -24,6 +25,7 @@ function obtener_estadisticas_inicio() {
         return [];
     }
 }
+
 /**
  * Obtiene los banners del carrusel principal
  * 
@@ -47,6 +49,82 @@ function obtener_banners_principales() {
         return [];
     }
 }
+
+/**
+ * Obtiene las secciones activas de la página de inicio
+ * 
+ * @return array Arreglo de secciones
+ */
+function obtener_secciones_inicio() {
+    global $conn;
+    
+    try {
+        $stmt = $conn->prepare("
+            SELECT * FROM secciones_inicio 
+            WHERE activo = 1
+            ORDER BY orden ASC
+        ");
+        
+        $stmt->execute();
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+        
+    } catch(PDOException $e) {
+        error_log("Error en obtener_secciones_inicio: " . $e->getMessage());
+        return [];
+    }
+}
+
+/**
+ * Obtiene los banners dobles de una sección
+ * 
+ * @param int $seccion_id ID de la sección
+ * @return array Arreglo de banners dobles
+ */
+function obtener_banners_dobles($seccion_id) {
+    global $conn;
+    
+    try {
+        $stmt = $conn->prepare("
+            SELECT * FROM banners_dobles
+            WHERE seccion_id = ? AND activo = 1
+            ORDER BY posicion ASC
+        ");
+        
+        $stmt->execute([$seccion_id]);
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+        
+    } catch(PDOException $e) {
+        error_log("Error en obtener_banners_dobles: " . $e->getMessage());
+        return [];
+    }
+}
+
+/**
+ * Obtiene el nombre de una categoría por su ID
+ * 
+ * @param int $categoria_id ID de la categoría
+ * @return string Nombre de la categoría
+ */
+function obtener_nombre_categoria($categoria_id) {
+    global $conn;
+    
+    try {
+        $stmt = $conn->prepare("SELECT nombre FROM categorias WHERE id = ?");
+        $stmt->execute([$categoria_id]);
+        $resultado = $stmt->fetch(PDO::FETCH_ASSOC);
+        
+        if ($resultado) {
+            return $resultado['nombre'];
+        }
+        
+        return 'Categoría';
+        
+    } catch(PDOException $e) {
+        error_log("Error en obtener_nombre_categoria: " . $e->getMessage());
+        return 'Categoría';
+    }
+}
+
 /**
  * Obtiene las guías o blogs destacados para mostrar en la página de inicio
  * 
@@ -130,6 +208,349 @@ function obtener_comparadores_categorias($limit = 1) {
         error_log("Error en obtener_comparadores_categorias: " . $e->getMessage());
         return [];
     }
+}
+
+/**
+ * Muestra el carrusel principal de la página de inicio
+ * 
+ * @param array $banners Arreglo de banners
+ */
+function mostrar_carrusel_principal($banners) {
+    if (empty($banners)) {
+        return;
+    }
+    ?>
+    <div class="carrusel-principal" style="margin-bottom: 30px; border-radius: 8px; overflow: hidden; position: relative;">
+        <div class="carrusel-items" style="display: flex; transition: transform 0.5s ease; position: relative;">
+            <?php foreach ($banners as $index => $banner): ?>
+                <div class="carrusel-item" style="min-width: 100%; <?php echo $index == 0 ? 'display: block;' : 'display: none;'; ?>">
+                    <a href="<?php echo $banner['url']; ?>" style="display: block; position: relative;">
+                        <?php if (!empty($banner['imagen'])): ?>
+                            <img src="<?php echo BANNERS_IMG_URL . '/' . $banner['imagen']; ?>" alt="<?php echo $banner['titulo']; ?>" style="width: 100%; height: 400px; object-fit: cover;">
+                        <?php else: ?>
+                            <div style="width: 100%; height: 400px; background-color: #333;"></div>
+                        <?php endif; ?>
+                        
+                        <div style="position: absolute; bottom: 0; left: 0; right: 0; padding: 30px; background: linear-gradient(transparent, rgba(0,0,0,0.7)); color: white;">
+                            <h2 style="font-size: 28px; margin-bottom: 10px;"><?php echo $banner['titulo']; ?></h2>
+                            <p style="font-size: 16px; margin-bottom: 15px;"><?php echo $banner['descripcion']; ?></p>
+                            <span style="display: inline-block; background-color: #FF0000; color: white; padding: 8px 15px; border-radius: 4px; font-weight: 600;">Ver más</span>
+                        </div>
+                    </a>
+                </div>
+            <?php endforeach; ?>
+        </div>
+        
+        <!-- Controles del carrusel -->
+        <button class="carrusel-prev" style="position: absolute; top: 50%; left: 20px; transform: translateY(-50%); background-color: rgba(0,0,0,0.5); color: white; border: none; width: 40px; height: 40px; border-radius: 50%; font-size: 20px; cursor: pointer;">&#8249;</button>
+        <button class="carrusel-next" style="position: absolute; top: 50%; right: 20px; transform: translateY(-50%); background-color: rgba(0,0,0,0.5); color: white; border: none; width: 40px; height: 40px; border-radius: 50%; font-size: 20px; cursor: pointer;">&#8250;</button>
+        
+        <!-- Indicadores -->
+        <div class="carrusel-indicadores" style="position: absolute; bottom: 15px; left: 0; right: 0; display: flex; justify-content: center; gap: 10px;">
+            <?php foreach ($banners as $index => $banner): ?>
+                <button class="carrusel-indicador <?php echo $index == 0 ? 'active' : ''; ?>" data-slide="<?php echo $index; ?>" style="width: 12px; height: 12px; border-radius: 50%; border: none; background-color: <?php echo $index == 0 ? 'white' : 'rgba(255,255,255,0.5)'; ?>; cursor: pointer;"></button>
+            <?php endforeach; ?>
+        </div>
+    </div>
+    
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const carrusel = document.querySelector('.carrusel-principal');
+            const items = carrusel.querySelectorAll('.carrusel-item');
+            const prev = carrusel.querySelector('.carrusel-prev');
+            const next = carrusel.querySelector('.carrusel-next');
+            const indicadores = carrusel.querySelectorAll('.carrusel-indicador');
+            
+            let currentSlide = 0;
+            const totalSlides = items.length;
+            
+            function showSlide(index) {
+                // Ocultar todos los slides
+                items.forEach(item => {
+                    item.style.display = 'none';
+                });
+                
+                // Desactivar todos los indicadores
+                indicadores.forEach(ind => {
+                    ind.style.backgroundColor = 'rgba(255,255,255,0.5)';
+                });
+                
+                // Mostrar el slide actual
+                items[index].style.display = 'block';
+                
+                // Activar el indicador actual
+                indicadores[index].style.backgroundColor = 'white';
+                
+                currentSlide = index;
+            }
+            
+            function nextSlide() {
+                let nextIndex = currentSlide + 1;
+                if (nextIndex >= totalSlides) {
+                    nextIndex = 0;
+                }
+                showSlide(nextIndex);
+            }
+            
+            function prevSlide() {
+                let prevIndex = currentSlide - 1;
+                if (prevIndex < 0) {
+                    prevIndex = totalSlides - 1;
+                }
+                showSlide(prevIndex);
+            }
+            
+            // Configurar eventos para botones de navegación
+            prev.addEventListener('click', prevSlide);
+            next.addEventListener('click', nextSlide);
+            
+            // Configurar eventos para indicadores
+            indicadores.forEach((ind, index) => {
+                ind.addEventListener('click', () => {
+                    showSlide(index);
+                });
+            });
+            
+            // Autoplay del carrusel
+            let autoplayInterval = setInterval(nextSlide, 5000);
+            
+            // Detener autoplay al pasar el mouse sobre el carrusel
+            carrusel.addEventListener('mouseover', () => {
+                clearInterval(autoplayInterval);
+            });
+            
+            // Reanudar autoplay al quitar el mouse del carrusel
+            carrusel.addEventListener('mouseout', () => {
+                autoplayInterval = setInterval(nextSlide, 5000);
+            });
+        });
+    </script>
+    <?php
+}
+
+/**
+ * Muestra la sección de comparador visual de categorías
+ * 
+ * @param array $comparador Datos del comparador
+ */
+function mostrar_comparador_categorias($comparador) {
+    if (empty($comparador)) {
+        return;
+    }
+    
+    $comparador = $comparador[0]; // Tomar el primer comparador
+    ?>
+    <div style="margin: 40px 0;">
+        <h2 style="margin-bottom: 30px; font-size: 24px; text-align: center; color: #333; position: relative;">
+            <?php echo $comparador['titulo']; ?>
+            <span style="display: block; width: 50px; height: 3px; background-color: #FF0000; margin: 10px auto 0;"></span>
+        </h2>
+        
+        <div style="display: flex; flex-wrap: wrap; gap: 20px;">
+            <!-- Primera categoría -->
+            <div style="flex: 1; min-width: 300px; position: relative; overflow: hidden; border-radius: 8px; transition: transform 0.3s;">
+                <a href="<?php echo BASE_URL; ?>/public/categoria.php?slug=<?php echo $comparador['categoria1_id'] ? 'pc-gamer' : '#'; ?>" style="display: block; text-decoration: none; color: inherit;">
+                    <div style="position: relative;">
+                        <?php if (!empty($comparador['categoria1_imagen'])): ?>
+                            <img src="<?php echo BASE_URL; ?>/public/assets/images/comparadores/<?php echo $comparador['categoria1_imagen']; ?>" alt="<?php echo $comparador['categoria1_titulo']; ?>" style="width: 100%; height: 300px; object-fit: cover;">
+                        <?php else: ?>
+                            <div style="width: 100%; height: 300px; background-color: #333;"></div>
+                        <?php endif; ?>
+                        
+                        <div style="position: absolute; bottom: 0; left: 0; right: 0; padding: 20px; background: linear-gradient(transparent, rgba(0,0,0,0.8)); color: white;">
+                            <h3 style="font-size: 24px; margin-bottom: 10px;"><?php echo $comparador['categoria1_titulo']; ?></h3>
+                            <p style="margin-bottom: 15px;"><?php echo $comparador['categoria1_descripcion']; ?></p>
+                            <button style="background-color: #FF0000; color: white; border: none; padding: 8px 15px; font-size: 14px; font-weight: 600; border-radius: 4px; cursor: pointer;">
+                                Ver opciones
+                            </button>
+                        </div>
+                    </div>
+                </a>
+            </div>
+            
+            <!-- Segunda categoría -->
+            <div style="flex: 1; min-width: 300px; position: relative; overflow: hidden; border-radius: 8px; transition: transform 0.3s;">
+                <a href="<?php echo BASE_URL; ?>/public/categoria.php?slug=<?php echo $comparador['categoria2_id'] ? 'laptops' : '#'; ?>" style="display: block; text-decoration: none; color: inherit;">
+                    <div style="position: relative;">
+                        <?php if (!empty($comparador['categoria2_imagen'])): ?>
+                            <img src="<?php echo BASE_URL; ?>/public/assets/images/comparadores/<?php echo $comparador['categoria2_imagen']; ?>" alt="<?php echo $comparador['categoria2_titulo']; ?>" style="width: 100%; height: 300px; object-fit: cover;">
+                        <?php else: ?>
+                            <div style="width: 100%; height: 300px; background-color: #333;"></div>
+                        <?php endif; ?>
+                        
+                        <div style="position: absolute; bottom: 0; left: 0; right: 0; padding: 20px; background: linear-gradient(transparent, rgba(0,0,0,0.8)); color: white;">
+                            <h3 style="font-size: 24px; margin-bottom: 10px;"><?php echo $comparador['categoria2_titulo']; ?></h3>
+                            <p style="margin-bottom: 15px;"><?php echo $comparador['categoria2_descripcion']; ?></p>
+                            <button style="background-color: #FF0000; color: white; border: none; padding: 8px 15px; font-size: 14px; font-weight: 600; border-radius: 4px; cursor: pointer;">
+                                Ver opciones
+                            </button>
+                        </div>
+                    </div>
+                </a>
+            </div>
+        </div>
+    </div>
+    <?php
+}
+?>
+    <?php
+}
+
+/**
+ * Muestra un carrusel de productos
+ * 
+ * @param string $titulo Título de la sección
+ * @param array $productos Arreglo de productos
+ */
+function mostrar_carrusel_productos($titulo, $productos) {
+    if (empty($productos)) {
+        return;
+    }
+    ?>
+    <div class="seccion-productos" style="margin: 40px 0;">
+        <h2 style="font-size: 24px; margin-bottom: 20px; text-align: center; color: #333; position: relative;">
+            <?php echo $titulo; ?>
+            <span style="display: block; width: 50px; height: 3px; background-color: #FF0000; margin: 10px auto 0;"></span>
+        </h2>
+        
+        <!-- Carrusel de productos -->
+        <div class="productos-carrusel" style="position: relative;">
+            <!-- Contenedor de productos -->
+            <div class="productos-wrapper" style="overflow: hidden;">
+                <div class="productos-container" style="display: flex; flex-wrap: nowrap; transition: transform 0.5s ease; margin: 0 -10px;">
+                    <?php foreach ($productos as $index => $producto): ?>
+                        <div class="producto-slide" style="flex: 0 0 25%; max-width: 25%; padding: 0 10px; box-sizing: border-box;">
+                            <?php include($_SERVER['DOCUMENT_ROOT'] . '/compuyatienda/public/includes/product-card.php'); ?>
+                        </div>
+                    <?php endforeach; ?>
+                </div>
+            </div>
+            
+            <!-- Controles del carrusel -->
+            <?php if (count($productos) > 4): ?>
+            <button class="carrusel-prev" style="position: absolute; top: 50%; left: -15px; transform: translateY(-50%); background-color: white; color: #333; border: 1px solid #ddd; width: 40px; height: 40px; border-radius: 50%; font-size: 20px; cursor: pointer; z-index: 1;">&#8249;</button>
+            <button class="carrusel-next" style="position: absolute; top: 50%; right: -15px; transform: translateY(-50%); background-color: white; color: #333; border: 1px solid #ddd; width: 40px; height: 40px; border-radius: 50%; font-size: 20px; cursor: pointer; z-index: 1;">&#8250;</button>
+            <?php endif; ?>
+        </div>
+    </div>
+    
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Inicializar cada carrusel de productos
+            const carruseles = document.querySelectorAll('.productos-carrusel');
+            
+            carruseles.forEach(carrusel => {
+                const container = carrusel.querySelector('.productos-container');
+                const prev = carrusel.querySelector('.carrusel-prev');
+                const next = carrusel.querySelector('.carrusel-next');
+                
+                if (!prev || !next) return; // No hay controles, no inicializar
+                
+                const slides = carrusel.querySelectorAll('.producto-slide');
+                const totalSlides = slides.length;
+                const slidesPerView = 4; // Número de slides visibles a la vez
+                
+                let currentIndex = 0;
+                
+                // Función para mover el carrusel
+                function moveSlides(direction) {
+                    if (direction === 'next') {
+                        currentIndex = Math.min(currentIndex + slidesPerView, totalSlides - slidesPerView);
+                    } else {
+                        currentIndex = Math.max(currentIndex - slidesPerView, 0);
+                    }
+                    
+                    container.style.transform = `translateX(-${currentIndex * (100 / totalSlides)}%)`;
+                    
+                    // Actualizar estado de los botones
+                    prev.style.opacity = currentIndex > 0 ? '1' : '0.5';
+                    next.style.opacity = currentIndex < totalSlides - slidesPerView ? '1' : '0.5';
+                }
+                
+                // Configurar eventos para botones de navegación
+                prev.addEventListener('click', () => moveSlides('prev'));
+                next.addEventListener('click', () => moveSlides('next'));
+                
+                // Configurar estado inicial de los botones
+                prev.style.opacity = '0.5'; // Inicialmente desactivado
+                next.style.opacity = totalSlides > slidesPerView ? '1' : '0.5';
+            });
+        });
+    </script>
+    <?php
+}
+
+/**
+ * Muestra banners dobles
+ * 
+ * @param array $banners Arreglo de banners dobles
+ */
+function mostrar_banners_dobles($banners) {
+    if (empty($banners) || count($banners) < 2) {
+        return;
+    }
+    
+    // Separar banners por posición
+    $banner_izquierdo = null;
+    $banner_derecho = null;
+    
+    foreach ($banners as $banner) {
+        if ($banner['posicion'] == 'izquierda') {
+            $banner_izquierdo = $banner;
+        } elseif ($banner['posicion'] == 'derecha') {
+            $banner_derecho = $banner;
+        }
+    }
+    
+    // Si falta alguno de los banners, salir
+    if (!$banner_izquierdo || !$banner_derecho) {
+        return;
+    }
+    ?>
+    <div style="margin: 40px 0;">
+        <div style="display: flex; flex-wrap: wrap; gap: 20px;">
+            <!-- Banner izquierdo -->
+            <div style="flex: 1; min-width: 300px; position: relative; overflow: hidden; border-radius: 8px; transition: transform 0.3s ease;">
+                <a href="<?php echo $banner_izquierdo['url']; ?>" style="display: block;">
+                    <div style="position: relative;">
+                        <?php if (!empty($banner_izquierdo['imagen'])): ?>
+                            <img src="<?php echo BANNERS_IMG_URL . '/' . $banner_izquierdo['imagen']; ?>" alt="<?php echo $banner_izquierdo['titulo']; ?>" style="width: 100%; height: 250px; object-fit: cover;">
+                        <?php else: ?>
+                            <div style="width: 100%; height: 250px; background-color: #333;"></div>
+                        <?php endif; ?>
+                        
+                        <div style="position: absolute; bottom: 0; left: 0; right: 0; padding: 20px; background: linear-gradient(transparent, rgba(0,0,0,0.7)); color: white;">
+                            <h3 style="font-size: 20px; margin-bottom: 5px;"><?php echo $banner_izquierdo['titulo']; ?></h3>
+                            <?php if (!empty($banner_izquierdo['descripcion'])): ?>
+                                <p style="font-size: 14px;"><?php echo $banner_izquierdo['descripcion']; ?></p>
+                            <?php endif; ?>
+                        </div>
+                    </div>
+                </a>
+            </div>
+            
+            <!-- Banner derecho -->
+            <div style="flex: 1; min-width: 300px; position: relative; overflow: hidden; border-radius: 8px; transition: transform 0.3s ease;">
+                <a href="<?php echo $banner_derecho['url']; ?>" style="display: block;">
+                    <div style="position: relative;">
+                        <?php if (!empty($banner_derecho['imagen'])): ?>
+                            <img src="<?php echo BANNERS_IMG_URL . '/' . $banner_derecho['imagen']; ?>" alt="<?php echo $banner_derecho['titulo']; ?>" style="width: 100%; height: 250px; object-fit: cover;">
+                        <?php else: ?>
+                            <div style="width: 100%; height: 250px; background-color: #333;"></div>
+                        <?php endif; ?>
+                        
+                        <div style="position: absolute; bottom: 0; left: 0; right: 0; padding: 20px; background: linear-gradient(transparent, rgba(0,0,0,0.7)); color: white;">
+                            <h3 style="font-size: 20px; margin-bottom: 5px;"><?php echo $banner_derecho['titulo']; ?></h3>
+                            <?php if (!empty($banner_derecho['descripcion'])): ?>
+                                <p style="font-size: 14px;"><?php echo $banner_derecho['descripcion']; ?></p>
+                            <?php endif; ?>
+                        </div>
+                    </div>
+                </a>
+            </div>
+        </div>
+    </div>
+    <?php
 }
 
 /**
@@ -365,71 +786,3 @@ function mostrar_oferta_contador($oferta) {
             }, 1000);
         });
     </script>
-    <?php
-}
-
-/**
- * Muestra la sección de comparador visual de categorías
- * 
- * @param array $comparador Datos del comparador
- */
-function mostrar_comparador_categorias($comparador) {
-    if (empty($comparador)) {
-        return;
-    }
-    
-    $comparador = $comparador[0]; // Tomar el primer comparador
-    ?>
-    <div style="margin: 40px 0;">
-        <h2 style="margin-bottom: 30px; font-size: 24px; text-align: center; color: #333; position: relative;">
-            <?php echo $comparador['titulo']; ?>
-            <span style="display: block; width: 50px; height: 3px; background-color: #FF0000; margin: 10px auto 0;"></span>
-        </h2>
-        
-        <div style="display: flex; flex-wrap: wrap; gap: 20px;">
-            <!-- Primera categoría -->
-            <div style="flex: 1; min-width: 300px; position: relative; overflow: hidden; border-radius: 8px; transition: transform 0.3s;">
-                <a href="<?php echo BASE_URL; ?>/public/categoria.php?slug=<?php echo $comparador['categoria1_id'] ? 'pc-gamer' : '#'; ?>" style="display: block; text-decoration: none; color: inherit;">
-                    <div style="position: relative;">
-                        <?php if (!empty($comparador['categoria1_imagen'])): ?>
-                            <img src="<?php echo BASE_URL; ?>/public/assets/images/comparadores/<?php echo $comparador['categoria1_imagen']; ?>" alt="<?php echo $comparador['categoria1_titulo']; ?>" style="width: 100%; height: 300px; object-fit: cover;">
-                        <?php else: ?>
-                            <div style="width: 100%; height: 300px; background-color: #333;"></div>
-                        <?php endif; ?>
-                        
-                        <div style="position: absolute; bottom: 0; left: 0; right: 0; padding: 20px; background: linear-gradient(transparent, rgba(0,0,0,0.8)); color: white;">
-                            <h3 style="font-size: 24px; margin-bottom: 10px;"><?php echo $comparador['categoria1_titulo']; ?></h3>
-                            <p style="margin-bottom: 15px;"><?php echo $comparador['categoria1_descripcion']; ?></p>
-                            <button style="background-color: #FF0000; color: white; border: none; padding: 8px 15px; font-size: 14px; font-weight: 600; border-radius: 4px; cursor: pointer;">
-                                Ver opciones
-                            </button>
-                        </div>
-                    </div>
-                </a>
-            </div>
-            
-            <!-- Segunda categoría -->
-            <div style="flex: 1; min-width: 300px; position: relative; overflow: hidden; border-radius: 8px; transition: transform 0.3s;">
-                <a href="<?php echo BASE_URL; ?>/public/categoria.php?slug=<?php echo $comparador['categoria2_id'] ? 'laptops' : '#'; ?>" style="display: block; text-decoration: none; color: inherit;">
-                    <div style="position: relative;">
-                        <?php if (!empty($comparador['categoria2_imagen'])): ?>
-                            <img src="<?php echo BASE_URL; ?>/public/assets/images/comparadores/<?php echo $comparador['categoria2_imagen']; ?>" alt="<?php echo $comparador['categoria2_titulo']; ?>" style="width: 100%; height: 300px; object-fit: cover;">
-                        <?php else: ?>
-                            <div style="width: 100%; height: 300px; background-color: #333;"></div>
-                        <?php endif; ?>
-                        
-                        <div style="position: absolute; bottom: 0; left: 0; right: 0; padding: 20px; background: linear-gradient(transparent, rgba(0,0,0,0.8)); color: white;">
-                            <h3 style="font-size: 24px; margin-bottom: 10px;"><?php echo $comparador['categoria2_titulo']; ?></h3>
-                            <p style="margin-bottom: 15px;"><?php echo $comparador['categoria2_descripcion']; ?></p>
-                            <button style="background-color: #FF0000; color: white; border: none; padding: 8px 15px; font-size: 14px; font-weight: 600; border-radius: 4px; cursor: pointer;">
-                                Ver opciones
-                            </button>
-                        </div>
-                    </div>
-                </a>
-            </div>
-        </div>
-    </div>
-    <?php
-}
-
