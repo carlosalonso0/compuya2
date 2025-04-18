@@ -391,10 +391,10 @@ function mostrar_comparador_categorias($comparador) {
         </div>
     </div>
     <?php
-}
 ?>
-    <?php
+<?php
 }
+
 
 /**
  * Muestra un carrusel de productos
