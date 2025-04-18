@@ -296,14 +296,16 @@ function admin_obtener_banners_dobles($seccion_id, $solo_activos = false) {
         $sql .= " ORDER BY posicion ASC";
         
         $stmt = $conn->prepare($sql);
-        $stmt->execute([$seccion_id]);
+        $stmt->bindParam(1, $seccion_id, PDO::PARAM_INT);
+        $stmt->execute();
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
         
     } catch(PDOException $e) {
-        echo "Error: " . $e->getMessage();
+        error_log("Error en admin_obtener_banners_dobles: " . $e->getMessage());
         return [];
     }
 }
+
 
 /**
  * Obtiene un banner doble por ID
@@ -316,11 +318,12 @@ function admin_obtener_banner_doble($banner_id) {
     
     try {
         $stmt = $conn->prepare("SELECT * FROM banners_dobles WHERE id = ?");
-        $stmt->execute([$banner_id]);
+        $stmt->bindParam(1, $banner_id, PDO::PARAM_INT);
+        $stmt->execute();
         return $stmt->fetch(PDO::FETCH_ASSOC);
         
     } catch(PDOException $e) {
-        echo "Error: " . $e->getMessage();
+        error_log("Error en admin_obtener_banner_doble: " . $e->getMessage());
         return false;
     }
 }
@@ -534,19 +537,22 @@ function admin_buscar_productos($termino = '', $categoria_id = null, $limit = 10
         }
         
         if ($categoria_id) {
-            $sql .= " AND categoria_id = ?";
-            $params[] = $categoria_id;
+            // Convertir a entero para evitar inyección SQL
+            $categoria_id = (int)$categoria_id;
+            $sql .= " AND categoria_id = $categoria_id";
+            // No añadimos el parámetro al array porque ya lo pusimos directamente en la consulta
         }
         
-        $sql .= " ORDER BY id DESC LIMIT ?";
-        $params[] = $limit;
+        // El límite también debe convertirse a entero
+        $limit = (int)$limit;
+        $sql .= " ORDER BY id DESC LIMIT $limit";
         
         $stmt = $conn->prepare($sql);
         $stmt->execute($params);
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
         
     } catch(PDOException $e) {
-        echo "Error: " . $e->getMessage();
+        error_log("Error en admin_buscar_productos: " . $e->getMessage());
         return [];
     }
 }

@@ -46,13 +46,13 @@ function generate_slug($text) {
 
 // Función para generar SKU
 function generate_sku($product_name, $category_id, $product_id = null) {
-    // Tomar las primeras 3 letras del nombre del producto
-    $prefix = strtoupper(substr(preg_replace('/[^a-zA-Z]/', '', $product_name), 0, 3));
-    // Categoría
-    $category = str_pad($category_id, 2, '0', STR_PAD_LEFT);
-    // ID del producto o timestamp actual
-    $suffix = $product_id ? str_pad($product_id, 5, '0', STR_PAD_LEFT) : substr(time(), -5);
+    // Reemplazar espacios y caracteres especiales por guiones
+    $sku = trim(preg_replace('/[^a-zA-Z0-9]/', '-', $product_name));
+    // Eliminar guiones múltiples
+    $sku = preg_replace('/-+/', '-', $sku);
+    // Convertir a mayúsculas
+    $sku = strtoupper($sku);
     
-    return $prefix . '-' . $category . '-' . $suffix;
+    return $sku;
 }
 ?>

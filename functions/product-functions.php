@@ -12,6 +12,9 @@ function obtener_productos_seccion($seccion_nombre, $limit = 10) {
     global $conn;
     
     try {
+        // Asegurarnos que el límite sea un entero
+        $limit = (int)$limit;
+        
         // Obtener el ID de la sección
         $stmt = $conn->prepare("SELECT id FROM secciones_inicio WHERE nombre = ? AND activo = 1");
         $stmt->execute([$seccion_nombre]);
@@ -21,21 +24,22 @@ function obtener_productos_seccion($seccion_nombre, $limit = 10) {
             return [];
         }
         
-        // Obtener productos de la sección
-        $stmt = $conn->prepare("
+        // Obtener productos de la sección - incluir el límite directamente en la consulta
+        $sql = "
             SELECT p.* 
             FROM productos p
             INNER JOIN productos_seccion ps ON p.id = ps.producto_id
             WHERE ps.seccion_id = ? AND p.activo = 1
             ORDER BY ps.orden ASC
-            LIMIT ?
-        ");
+            LIMIT {$limit}
+        ";
         
-        $stmt->execute([$seccion['id'], $limit]);
+        $stmt = $conn->prepare($sql);
+        $stmt->execute([$seccion['id']]);
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
         
     } catch(PDOException $e) {
-        echo "Error: " . $e->getMessage();
+        error_log("Error en obtener_productos_seccion: " . $e->getMessage());
         return [];
     }
 }
@@ -51,18 +55,22 @@ function obtener_productos_categoria($categoria_id, $limit = 10) {
     global $conn;
     
     try {
-        $stmt = $conn->prepare("
+        // Asegurarnos que el límite sea un entero
+        $limit = (int)$limit;
+        
+        $sql = "
             SELECT * FROM productos 
             WHERE categoria_id = ? AND activo = 1
             ORDER BY id DESC
-            LIMIT ?
-        ");
+            LIMIT {$limit}
+        ";
         
-        $stmt->execute([$categoria_id, $limit]);
+        $stmt = $conn->prepare($sql);
+        $stmt->execute([$categoria_id]);
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
         
     } catch(PDOException $e) {
-        echo "Error: " . $e->getMessage();
+        error_log("Error en obtener_productos_categoria: " . $e->getMessage());
         return [];
     }
 }

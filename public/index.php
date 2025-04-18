@@ -43,6 +43,30 @@ include($_SERVER['DOCUMENT_ROOT'] . '/compuyatienda/public/includes/header.php')
                         mostrar_carrusel_productos($titulo, $productos);
                     }
                     break;
+                
+                case 'estadisticas':
+                    // Obtener y mostrar estadísticas
+                    $estadisticas = obtener_estadisticas_inicio();
+                    mostrar_estadisticas($estadisticas);
+                    break;
+                
+                case 'blogs_guias':
+                    // Obtener y mostrar blogs o guías
+                    $blogs = obtener_blogs_guias();
+                    mostrar_blogs_guias($blogs);
+                    break;
+                
+                case 'ofertas_contador':
+                    // Obtener y mostrar oferta con contador
+                    $oferta = obtener_oferta_contador();
+                    mostrar_oferta_contador($oferta);
+                    break;
+                
+                case 'comparador':
+                    // Obtener y mostrar comparador de categorías
+                    $comparador = obtener_comparadores_categorias();
+                    mostrar_comparador_categorias($comparador);
+                    break;
             }
         }
         ?>
