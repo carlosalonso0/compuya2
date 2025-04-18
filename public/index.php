@@ -3,6 +3,7 @@ require_once($_SERVER['DOCUMENT_ROOT'] . '/compuyatienda/config/config.php');
 require_once($_SERVER['DOCUMENT_ROOT'] . '/compuyatienda/config/db.php');
 require_once($_SERVER['DOCUMENT_ROOT'] . '/compuyatienda/functions/product-functions.php');
 require_once($_SERVER['DOCUMENT_ROOT'] . '/compuyatienda/functions/home-functions.php');
+require_once($_SERVER['DOCUMENT_ROOT'] . '/compuyatienda/functions/home-functions-extended.php');
 
 // Incluir el header
 include($_SERVER['DOCUMENT_ROOT'] . '/compuyatienda/public/includes/header.php');
