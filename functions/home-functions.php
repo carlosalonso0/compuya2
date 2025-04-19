@@ -183,23 +183,25 @@ function mostrar_carrusel_principal($banners) {
         return;
     }
     ?>
-    <div style="margin-bottom: 40px; position: relative; overflow: hidden; height: 400px; border-radius: 8px;">
-        <?php foreach ($banners as $index => $banner): ?>
-            <div class="banner-slide" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; opacity: <?php echo $index === 0 ? '1' : '0'; ?>; transition: opacity 1s ease-in-out;">
-                <a href="<?php echo $banner['url']; ?>" style="display: block; height: 100%;">
-                    <img src="<?php echo BANNERS_IMG_URL . '/' . $banner['imagen']; ?>" alt="<?php echo $banner['titulo']; ?>" style="width: 100%; height: 100%; object-fit: cover;">
-                    <div style="position: absolute; bottom: 0; left: 0; right: 0; padding: 30px; background: linear-gradient(transparent, rgba(0,0,0,0.7)); color: white;">
-                        <h2 style="margin: 0; font-size: 28px;"><?php echo $banner['titulo']; ?></h2>
-                        <p style="margin: 10px 0 0 0; font-size: 16px;"><?php echo $banner['descripcion']; ?></p>
-                    </div>
-                </a>
-            </div>
-        <?php endforeach; ?>
+    <div class="main-banner">
+        <div class="main-banner-slides">
+            <?php foreach ($banners as $index => $banner): ?>
+                <div class="banner-slide <?php echo $index === 0 ? 'active' : ''; ?>">
+                    <a href="<?php echo $banner['url']; ?>">
+                        <img src="<?php echo BANNERS_IMG_URL . '/' . $banner['imagen']; ?>" alt="<?php echo $banner['titulo']; ?>">
+                        <div class="banner-content">
+                            <h2><?php echo $banner['titulo']; ?></h2>
+                            <p><?php echo $banner['descripcion']; ?></p>
+                        </div>
+                    </a>
+                </div>
+            <?php endforeach; ?>
+        </div>
         
         <!-- Navegación del carrusel -->
-        <div style="position: absolute; bottom: 20px; left: 0; right: 0; display: flex; justify-content: center; gap: 10px;">
+        <div class="banner-dots">
             <?php foreach ($banners as $index => $banner): ?>
-                <button class="banner-dot" data-index="<?php echo $index; ?>" style="width: 12px; height: 12px; border-radius: 50%; background-color: <?php echo $index === 0 ? 'white' : 'rgba(255, 255, 255, 0.5)'; ?>; border: none; cursor: pointer;"></button>
+                <button class="banner-dot <?php echo $index === 0 ? 'active' : ''; ?>" data-index="<?php echo $index; ?>"></button>
             <?php endforeach; ?>
         </div>
     </div>
@@ -214,12 +216,12 @@ function mostrar_carrusel_principal($banners) {
             // Función para cambiar de slide
             function showSlide(index) {
                 // Ocultar todos los slides
-                slides.forEach(slide => slide.style.opacity = '0');
-                dots.forEach(dot => dot.style.backgroundColor = 'rgba(255, 255, 255, 0.5)');
+                slides.forEach(slide => slide.classList.remove('active'));
+                dots.forEach(dot => dot.classList.remove('active'));
                 
                 // Mostrar el slide actual
-                slides[index].style.opacity = '1';
-                dots[index].style.backgroundColor = 'white';
+                slides[index].classList.add('active');
+                dots[index].classList.add('active');
                 currentSlide = index;
             }
             

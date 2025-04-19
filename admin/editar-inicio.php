@@ -125,16 +125,56 @@ include($_SERVER['DOCUMENT_ROOT'] . '/compuyatienda/admin/includes/admin-header.
                         </span>
                     </div>
                     <div>
-                        <a href="<?php echo ADMIN_URL; ?>/editar-inicio.php?accion=toggle_activo&id=<?php echo $seccion['id']; ?>" class="btn btn-<?php echo $seccion['activo'] ? 'warning' : 'success'; ?> btn-sm">
-                            <?php echo $seccion['activo'] ? 'Desactivar' : 'Activar'; ?>
-                        </a>
-                        <button type="button" class="btn btn-primary btn-sm" onclick="editarSeccion(<?php echo $seccion['id']; ?>, '<?php echo $seccion['titulo_mostrar']; ?>', '<?php echo $seccion['tipo']; ?>', <?php echo $seccion['categoria_id'] ? $seccion['categoria_id'] : 'null'; ?>, <?php echo $seccion['activo']; ?>)">
-                            Editar
-                        </button>
-                        <a href="<?php echo ADMIN_URL; ?>/editar-seccion.php?id=<?php echo $seccion['id']; ?>" class="btn btn-success btn-sm">
-                            Gestionar
-                        </a>
-                    </div>
+    <a href="<?php echo ADMIN_URL; ?>/editar-inicio.php?accion=toggle_activo&id=<?php echo $seccion['id']; ?>" class="btn btn-<?php echo $seccion['activo'] ? 'warning' : 'success'; ?> btn-sm">
+        <?php echo $seccion['activo'] ? 'Desactivar' : 'Activar'; ?>
+    </a>
+    <button type="button" class="btn btn-primary btn-sm" onclick="editarSeccion(<?php echo $seccion['id']; ?>, '<?php echo $seccion['titulo_mostrar']; ?>', '<?php echo $seccion['tipo']; ?>', <?php echo $seccion['categoria_id'] ? $seccion['categoria_id'] : 'null'; ?>, <?php echo $seccion['activo']; ?>)">
+        Editar
+    </button>
+    <?php
+// Determinar la URL correcta para gestionar cada tipo de sección
+$gestion_url = '';
+
+if ($seccion['tipo'] == 'carrusel' || $seccion['tipo'] == 'banner_doble' || $seccion['tipo'] == 'categoria') {
+    // Usar editar-seccion.php para tipos estándar
+    $gestion_url = ADMIN_URL . '/editar-seccion.php?id=' . $seccion['id'];
+} else {
+    // Usar páginas específicas para tipos especiales basadas en el tipo, no en el nombre
+    switch ($seccion['tipo']) {
+        case 'estadisticas':
+            $gestion_url = ADMIN_URL . '/estadisticas.php';
+            break;
+        case 'blogs_guias':
+            $gestion_url = ADMIN_URL . '/blogs.php';
+            break;
+        case 'comparador':
+            $gestion_url = ADMIN_URL . '/comparador.php';
+            break;
+        case 'ofertas_contador':
+            $gestion_url = ADMIN_URL . '/ofertas-contador.php';
+            break;
+        default:
+            // También verificar por nombre para casos especiales
+            if ($seccion['nombre'] == 'estadistica') {
+                $gestion_url = ADMIN_URL . '/estadisticas.php';
+            } elseif ($seccion['nombre'] == 'contador') {
+                $gestion_url = ADMIN_URL . '/ofertas-contador.php';
+            } elseif ($seccion['nombre'] == 'blog') {
+                $gestion_url = ADMIN_URL . '/blogs.php';
+            } else {
+                // Si no coincide con ningún caso específico, usar la URL genérica
+                $gestion_url = ADMIN_URL . '/editar-seccion.php?id=' . $seccion['id'];
+            }
+    }
+}
+?>
+    <a href="<?php echo $gestion_url; ?>" class="btn btn-success btn-sm">
+        Gestionar
+    </a>
+    <a href="<?php echo ADMIN_URL; ?>/editar-inicio.php?accion=eliminar&id=<?php echo $seccion['id']; ?>" class="btn btn-danger btn-sm" onclick="return confirmarEliminacion('¿Está seguro que desea eliminar esta sección?');">
+        Eliminar
+    </a>
+</div>
                 </li>
             <?php endforeach; ?>
         </ul>

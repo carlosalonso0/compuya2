@@ -1,0 +1,217 @@
+/* Estilos responsive para toda la tienda */
+
+/* Tablets grandes (992px y menores) */
+@media (max-width: 992px) {
+    :root {
+      --font-size-3xl: 1.75rem;
+      --font-size-2xl: 1.375rem;
+    }
+    
+    /* Cabecera */
+    .search-bar {
+      max-width: 300px;
+    }
+    
+    /* Carruseles */
+    .main-banner {
+      height: 350px;
+    }
+    
+    /* Grids */
+    .grid-4 {
+      grid-template-columns: repeat(3, 1fr);
+    }
+    
+    /* Productos relacionados */
+    .related-grid {
+      grid-template-columns: repeat(3, 1fr);
+    }
+  }
+  
+  /* Tablets y móviles (768px y menores) */
+  @media (max-width: 768px) {
+    :root {
+      --spacing-xl: 1.5rem;
+      --spacing-lg: 1rem;
+    }
+    
+    /* Cabecera */
+    .header-top {
+      flex-wrap: wrap;
+    }
+    
+    .logo {
+      flex: 1;
+    }
+    
+    .search-bar {
+      order: 3;
+      margin: var(--spacing-sm) 0 0 0;
+      max-width: 100%;
+      flex: 0 0 100%;
+    }
+    
+    /* Navegación */
+    .nav-categories ul {
+      display: flex;
+      overflow-x: auto;
+      -webkit-overflow-scrolling: touch;
+      scroll-snap-type: x mandatory;
+      padding-bottom: var(--spacing-xs);
+    }
+    
+    .nav-categories li {
+      scroll-snap-align: start;
+      white-space: nowrap;
+    }
+    
+    /* Banners */
+    .main-banner {
+      height: 250px;
+    }
+    
+    .banner-content h2 {
+      font-size: var(--font-size-xl);
+    }
+    
+    /* Grids */
+    .grid-3, .grid-4 {
+      grid-template-columns: repeat(2, 1fr);
+    }
+    
+    /* Página de producto */
+    .product-detail {
+      flex-direction: column;
+    }
+    
+    .product-gallery {
+      flex: 0 0 100%;
+    }
+    
+    /* Carruseles de productos */
+    .products-carousel .product-card {
+      flex: 0 0 240px;
+      max-width: 240px;
+    }
+    
+    /* Contador de ofertas */
+    .countdown-container {
+      gap: var(--spacing-sm);
+    }
+    
+    .countdown-item {
+      min-width: 60px;
+      padding: var(--spacing-sm);
+    }
+    
+    .countdown-value {
+      font-size: var(--font-size-xl);
+    }
+    
+    /* Comparador */
+    .comparator-options {
+      flex-direction: column;
+    }
+    
+    /* Filtros en categoría y búsqueda */
+    .category-content, .search-content {
+      flex-direction: column;
+    }
+    
+    .filters-sidebar, .search-filters {
+      flex: 0 0 100%;
+    }
+  }
+  
+  /* Móviles (576px y menores) */
+  @media (max-width: 576px) {
+    :root {
+      --font-size-3xl: 1.5rem;
+      --font-size-2xl: 1.25rem;
+      --font-size-xl: 1.125rem;
+      --spacing-md: 0.75rem;
+    }
+    
+    /* Grids */
+    .grid-2, .grid-3, .grid-4, .grid-auto {
+      grid-template-columns: 1fr;
+    }
+    
+    /* Banner */
+    .main-banner {
+      height: 200px;
+    }
+    
+    .banner-content {
+      padding: var(--spacing-md);
+    }
+    
+    /* Productos */
+    .products-header {
+      flex-direction: column;
+      align-items: flex-start;
+      gap: var(--spacing-sm);
+    }
+    
+    .products-grid, .search-results-grid {
+      grid-template-columns: repeat(2, 1fr);
+      gap: var(--spacing-sm);
+    }
+    
+    /* Doble banner */
+    .double-banners {
+      flex-direction: column;
+    }
+    
+    /* Página de producto */
+    .main-image {
+      height: 300px;
+    }
+    
+    .product-title {
+      font-size: var(--font-size-xl);
+    }
+    
+    .product-meta {
+      flex-direction: column;
+      gap: var(--spacing-xs);
+    }
+    
+    .thumbnail {
+      width: 60px;
+      height: 60px;
+    }
+    
+    /* Contador */
+    .countdown-item {
+      min-width: auto;
+      flex: 1;
+    }
+    
+    .offer-content {
+      padding: var(--spacing-md);
+    }
+    
+    .offer-title {
+      font-size: var(--font-size-xl);
+    }
+    
+    .offer-description {
+      font-size: var(--font-size-md);
+    }
+  }
+  
+  /* Móviles pequeños (375px y menores) */
+  @media (max-width: 375px) {
+    .products-grid, .search-results-grid {
+      grid-template-columns: 1fr;
+    }
+    
+    .subcategory-card {
+      width: 120px;
+    }
+    
+    .user-actions a {
+      margin-left: var(--spacing-sm);
+    }
+  }

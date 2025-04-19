@@ -282,6 +282,26 @@ require_once($_SERVER['DOCUMENT_ROOT'] . '/compuyatienda/config/config.php');
             background-color: #f5f5f5;
         }
     </style>
+<!-- Agrega antes del cierre del head -->
+<script src="<?php echo BASE_URL; ?>/public/assets/js/admin/common.js"></script>
+<?php 
+// Determinar qué scripts adicionales cargar según la página actual
+$current_page = basename($_SERVER['PHP_SELF']);
+switch ($current_page) {
+    case 'editar-inicio.php':
+        echo '<script src="' . BASE_URL . '/public/assets/js/admin/secciones.js"></script>';
+        break;
+    case 'productos.php':
+    case 'producto-crear.php':
+    case 'producto-editar.php':
+        echo '<script src="' . BASE_URL . '/public/assets/js/admin/productos.js"></script>';
+        break;
+    case 'categorias.php':
+        echo '<script src="' . BASE_URL . '/public/assets/js/admin/categorias.js"></script>';
+        break;
+    // Más casos según sea necesario
+}
+?>
 </head>
 <body>
     <!-- Menú lateral -->

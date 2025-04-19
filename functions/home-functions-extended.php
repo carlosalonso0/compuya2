@@ -256,7 +256,8 @@ function mostrar_oferta_contador($oferta) {
         return;
     }
     ?>
-    <div style="margin: 40px 0; position: relative; overflow: hidden; border-radius: 8px;">
+    <div class="offer-countdown-wrapper">
+        <div class="offer-countdown">
         <a href="<?php echo $oferta['url']; ?>" style="display: block; text-decoration: none; color: inherit;">
             <div style="position: relative;">
                 <?php if (!empty($oferta['imagen'])): ?>

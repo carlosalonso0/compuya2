@@ -9,15 +9,19 @@ require_once($_SERVER['DOCUMENT_ROOT'] . '/compuyatienda/functions/home-function
 include($_SERVER['DOCUMENT_ROOT'] . '/compuyatienda/public/includes/header.php');
 ?>
 
-<main style="padding: 20px 0;">
+<main style="padding: 0;">
     <div class="container">
-        <?php
-        // Obtener y mostrar banners principales
-        $banners_principales = obtener_banners_principales();
-        if (!empty($banners_principales)) {
-            mostrar_carrusel_principal($banners_principales);
-        }
+        <div class="main-banner-wrapper">
+            <?php
+            // Obtener y mostrar banners principales
+            $banners_principales = obtener_banners_principales();
+            if (!empty($banners_principales)) {
+                mostrar_carrusel_principal($banners_principales);
+            }
+            ?>
+        </div>
         
+        <?php
         // Obtener secciones de inicio
         $secciones = obtener_secciones_inicio();
         

@@ -1,0 +1,110 @@
+/* Tipografías */
+body {
+    font-family: var(--font-primary);
+    font-size: var(--font-size-md);
+    color: var(--color-gray-600);
+  }
+  
+  h1, h2, h3, h4, h5, h6 {
+    font-weight: 700;
+    line-height: 1.2;
+    margin-bottom: var(--spacing-sm);
+    color: var(--color-gray-600);
+  }
+  
+  h1 {
+    font-size: var(--font-size-3xl);
+  }
+  
+  h2 {
+    font-size: var(--font-size-2xl);
+  }
+  
+  h3 {
+    font-size: var(--font-size-xl);
+  }
+  
+  h4 {
+    font-size: var(--font-size-lg);
+  }
+  
+  h5 {
+    font-size: var(--font-size-md);
+  }
+  
+  h6 {
+    font-size: var(--font-size-sm);
+  }
+  
+  p {
+    margin-bottom: var(--spacing-md);
+  }
+  
+  a {
+    color: var(--color-primary);
+    transition: color var(--transition-fast);
+  }
+  
+  a:hover {
+    color: var(--color-secondary);
+  }
+  
+  .text-center {
+    text-align: center;
+  }
+  
+  .text-right {
+    text-align: right;
+  }
+  
+  .text-primary {
+    color: var(--color-primary);
+  }
+  
+  .text-secondary {
+    color: var(--color-secondary);
+  }
+  
+  .text-success {
+    color: var(--color-success);
+  }
+  
+  .text-danger {
+    color: var(--color-danger);
+  }
+  
+  .text-warning {
+    color: var(--color-warning);
+  }
+  
+  .text-info {
+    color: var(--color-info);
+  }
+  
+  .text-muted {
+    color: var(--color-gray-400);
+  }
+  
+  .text-sm {
+    font-size: var(--font-size-sm);
+  }
+  
+  .text-lg {
+    font-size: var(--font-size-lg);
+  }
+  
+  .text-xl {
+    font-size: var(--font-size-xl);
+  }
+  
+  .text-bold {
+    font-weight: 700;
+  }
+  
+  .text-uppercase {
+    text-transform: uppercase;
+  }
+  
+  .text-line-through {
+    text-decoration: line-through;
+  }
